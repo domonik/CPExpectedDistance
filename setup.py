@@ -7,7 +7,6 @@ sys.path.append(os.getcwd())
 from tools.build_dependencies import build_viennarna
 
 
-"-I/home/rabsch/.local/include/ViennaRNA"
 
 CONDA_BUILD = False
 SKIP_VIENNARNA = False
@@ -70,6 +69,8 @@ expected_distance_module = Extension(
     include_dirs=include_dir,
 )
 
+with open("README.md") as handle:
+    LONGDESC = handle.read()
 
 
 def main():
@@ -77,9 +78,10 @@ def main():
         name="CPExpectedDistance",
         packages=find_packages(),
         version="0.1.0",
-        description="Python interface for the fputs C library function",
-        author="<your name>",
-        author_email="your_email@gmail.com",
+        description="Python interface for the CP Expected Distances function",
+        long_description=LONGDESC,
+        author="Domonik",
+        author_email="dominik.rabsch@gmail.com",
         include_package_data=True,
         ext_modules=[expected_distance_module],
         install_requires=[
@@ -87,5 +89,3 @@ def main():
         ]
           )
 
-if __name__ == "__main__":
-    main()
