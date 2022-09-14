@@ -145,21 +145,17 @@ static PyObject *clote_ponty_method(PyObject *self, PyObject *args) {
     }
 //    printf("temp: %f\n", md.temperature);
     if (!set_model_details_from_config(md_config, &md)) {return NULL;};
-//    printf("temp: %f\n", md.temperature);
 //    printf("temp: %d\n", md.dangles);
 
 
-    vrna_fold_compound_t  *fc = vrna_fold_compound(seq, NULL, VRNA_OPTION_DEFAULT);
+    vrna_fold_compound_t  *fc = vrna_fold_compound(seq, &md, VRNA_OPTION_DEFAULT);
     double mfe = (double)vrna_mfe(fc, NULL);
     vrna_exp_params_rescale(fc, &mfe);
 
     vrna_pf(fc, NULL);
     long int dims[2] = {fc->exp_matrices->length, fc->exp_matrices->length };
-    printf("FOOO\n");
     PyArrayObject *output;
     output = (PyArrayObject *) PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
-    printf("FOO2O\n");
-    printf("FOOO4\n");
 
     unsigned int j;
     for (unsigned int l = 1; l < fc->exp_matrices->length + 1; l = l+1){
@@ -203,15 +199,15 @@ static PyMethodDef ExpDMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-static struct PyModuleDef exp_d = {
+static struct PyModuleDef c_expected_distance = {
     PyModuleDef_HEAD_INIT,
-    "cp_expected_distance",
+    "c_expected_distance",
     "clote-ponty expected distance calculation",
     -1,
     ExpDMethods
 };
 
-PyMODINIT_FUNC PyInit_exp_d(void) {
+PyMODINIT_FUNC PyInit_c_expected_distance(void) {
     import_array();
-    return PyModule_Create(&exp_d);
+    return PyModule_Create(&c_expected_distance);
 }

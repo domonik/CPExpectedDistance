@@ -1,0 +1,3 @@
+[submodule "ViennaRNA"]
+	path = ViennaRNA
+	url = https://github.com/domonik/ViennaRNA.git
