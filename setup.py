@@ -3,6 +3,7 @@ import os
 import sys
 import numpy as np
 from sysconfig import get_paths
+import versioneer
 sys.path.append(os.getcwd())
 from tools.build_dependencies import build_viennarna
 
@@ -76,8 +77,9 @@ with open("README.md") as handle:
 def main():
     setup(
         name="CPExpectedDistance",
+        cmdclass=versioneer.get_cmdclass(),
         packages=find_packages(),
-        version="0.1.0",
+        version=versioneer.get_version(),
         description="Python interface for the CP Expected Distances function",
         long_description=LONGDESC,
         author="Domonik",
