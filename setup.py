@@ -81,7 +81,7 @@ def main():
         packages=find_packages(),
         version=versioneer.get_version(),
         description="Python interface for the CP Expected Distances function",
-        long_description=LONGDESC,
+        long_description="Python interface for the CP Expected Distances function",
         author="Domonik",
         author_email="dominik.rabsch@gmail.com",
         include_package_data=True,
