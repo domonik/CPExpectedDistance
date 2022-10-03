@@ -13,18 +13,26 @@
 #include <ViennaRNA/loops/external.h>
 #include <ViennaRNA/alphabet.h>
 
+typedef struct {
+    PyObject_HEAD
+    void *ptr;
+    void *ty;
+    int own;
+    PyObject *next;
+    PyObject *dict;
+} SwigPyObject;
 
 
-//static void reprint(PyObject *obj) {
-//    PyObject* repr = PyObject_Repr(obj);
-//    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
-//    const char *bytes = PyBytes_AS_STRING(str);
-//
-//    printf("REPR: %s\n", bytes);
-//
-//    Py_XDECREF(repr);
-//    Py_XDECREF(str);
-//}
+static void reprint(PyObject *obj) {
+    PyObject* repr = PyObject_Repr(obj);
+    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
+    const char *bytes = PyBytes_AS_STRING(str);
+
+    printf("REPR: %s\n", bytes);
+
+    Py_XDECREF(repr);
+    Py_XDECREF(str);
+}
 
 
 static int set_config_double(PyObject *md_config, double *value, char *key){
@@ -120,8 +128,64 @@ static double new_exp_E_ext_stem(vrna_fold_compound_t *fc, unsigned int i, unsig
     return (double)vrna_exp_E_ext_stem(type,enc5,enc3,fc->exp_params);
 }
 
+static vrna_fold_compound_t *swig_fc_to_fc(PyObject *swig_fold_compound) {
+    SwigPyObject *swf = (SwigPyObject*) swig_fold_compound;
+    vrna_fold_compound_t *fc = (vrna_fold_compound_t*) swf->ptr;
+    return fc;
+}
+
+static void fill_expected_distance(PyArrayObject *parray, vrna_fold_compound_t *fc) {
+    double *res;
+    double z;
+    unsigned int j;
+    double *prev_res;
+
+    for (unsigned int l = 1; l < fc->exp_matrices->length + 1; l = l+1){
+        for (unsigned int i = 1;  i < fc->exp_matrices->length + 1 - l; i = i+1){
+            j = i + l;
+            res = PyArray_GETPTR2(parray, (i-1), (j-1));
+            prev_res =  PyArray_GETPTR2(parray, (i-1), (j-2));
+            z = *prev_res * fc->exp_matrices->scale[1] + get_Z(fc, i, j);
+            for (unsigned int  k = i+1;  k <= j; k = k+1){
+                prev_res = PyArray_GETPTR2(parray, i-1, k-2);
+                z +=  (*prev_res + get_Z(fc, i, k-1)) * get_ZB(fc, k, j) * new_exp_E_ext_stem(fc, k, j);
+            }
+
+            *res = z ;
+        }
+    }
+    for (unsigned int i = 1; i < fc->exp_matrices->length + 1; i = i+1){
+        for (unsigned int j = i+1;  j < fc->exp_matrices->length + 1; j = j+1){
+            res = PyArray_GETPTR2(parray, i-1, j-1);
+            *res /= get_Z(fc, i, j);
+        }
+    }
+}
+
+
 
 static PyObject *clote_ponty_method(PyObject *self, PyObject *args) {
+    PyObject *swig_fc;
+
+    if(!PyArg_ParseTuple(args, "O", &swig_fc)) {
+
+    return NULL;
+
+    }
+    reprint(swig_fc);
+    vrna_fold_compound_t *fc = swig_fc_to_fc(swig_fc);
+    double mfe = (double)vrna_mfe(fc, NULL);
+    vrna_exp_params_rescale(fc, &mfe);
+    vrna_pf(fc, NULL);
+    long int dims[2] = {fc->exp_matrices->length, fc->exp_matrices->length };
+    PyArrayObject *output = (PyArrayObject *) PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+    fill_expected_distance(output, fc);
+    return PyArray_Return(output);
+}
+
+
+
+static PyObject *clote_ponty_method_old(PyObject *self, PyObject *args) {
     PyObject *md_config = NULL;
     double z;
     double *res;
@@ -195,9 +259,12 @@ static PyObject *clote_ponty_method(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef ExpDMethods[] = {
-    {"cp_expected_distance", clote_ponty_method, METH_VARARGS, "Python interface for clote-ponty expected distance calculation"},
+    {"cp_expected_distance_old", clote_ponty_method_old, METH_VARARGS, "Python interface for clote-ponty expected distance calculation"},
+    {"cp_expected_distance", clote_ponty_method, METH_VARARGS, "Python interface for getting the fold compound back"},
+
     {NULL, NULL, 0, NULL}
 };
+
 
 static struct PyModuleDef c_expected_distance = {
     PyModuleDef_HEAD_INIT,
