@@ -28,9 +28,22 @@ pip install cpexpecteddistance
 
 > **Warning**
 >   
-> Installation might take some time since it is compiling ViennaRNA from source.
+> Please Note that you need ViennaRNA to be installed. We recommend to install it via Conda
 > 
-> Sit back and relax
+> ```
+> conda install -c bioconda viennarna
+> ```
+> 
+
+
+> **Warning**
+>   
+> If you get any compiler errors try to use a conda environment and install g++ there via:
+> 
+> ```
+> conda install -c conda-forge gxx
+> ```
+
 
 ## Usage
 

@@ -5,7 +5,6 @@ import numpy as np
 from sysconfig import get_paths
 import versioneer
 sys.path.append(os.getcwd())
-from tools.build_dependencies import build_viennarna
 
 
 
