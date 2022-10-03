@@ -38,25 +38,27 @@ Afterwards you should be able to use the functionality as follows:
 
 ```python
 from CPExpectedDistance import expected_distance
+import RNA
 
 seq = "AAUGCUGAACGUAGCUACGAUCGAUCGACG"
-array = expected_distance(seq)
+fc = RNA.fold_compound(seq)
+array = expected_distance(fc)
 terminal_distance = array[0, -1]
 ```
 
-The `expected_distance` function takes a second argument which is a dictionary of 
-string keys and values. This is used to change ViennaRNAs model details.
-The key names and their value types can be found here:
+The `expected_distance` function is fully compatible with the ViennRNA Python API, thus you can
+change the model details for folding as usual. 
 
-https://www.tbi.univie.ac.at/RNA/ViennaRNA/doc/html/group__model__details.html#structvrna__md__s
-
-You can change the folding temperature as follows:
+For example you can change the folding temperature as follows:
 
 ```python
 from CPExpectedDistance import expected_distance
+import RNA
 
 seq = "AAUGCUGAACGUAGCUACGAUCGAUCGACG"
-array = expected_distance(seq, {"temperature": 20})
+md = RNA.md(temperature=20)
+fc = RNA.fold_compound(seq, md)
+array = expected_distance(fc)
 terminal_distance = array[0, -1]
 ```
 
