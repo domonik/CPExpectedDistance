@@ -172,7 +172,6 @@ static PyObject *clote_ponty_method(PyObject *self, PyObject *args) {
     return NULL;
 
     }
-    reprint(swig_fc);
     vrna_fold_compound_t *fc = swig_fc_to_fc(swig_fc);
     double mfe = (double)vrna_mfe(fc, NULL);
     vrna_exp_params_rescale(fc, &mfe);
